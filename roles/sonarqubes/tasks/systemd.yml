@@ -1,0 +1,12 @@
+- name: configure sonarqube service
+  become: yes
+  template:
+    src: sonarqube-common.service.j2
+    dest: "{{ systemd_service_path }}/{{ instance_id }}.service"
+    mode: 0644
+- name: enable sonarqube service
+  become: yes
+  systemd: 
+    name: "{{ instance_id }}"
+    daemon_reload: yes
+    enabled: yes

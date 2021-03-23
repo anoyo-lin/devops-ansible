@@ -1,0 +1,4 @@
+- hosts: confluences 
+  roles:
+    - common
+    - confluence

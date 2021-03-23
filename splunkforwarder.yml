@@ -1,0 +1,5 @@
+- hosts: missing-splunk-machines
+  become: yes
+  roles:
+    - yumrepo-noproxy
+    - splunkforwarder

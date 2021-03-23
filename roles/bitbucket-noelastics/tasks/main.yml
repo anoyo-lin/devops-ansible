@@ -1,0 +1,12 @@
+- name: configure bitbucket service
+  become: yes
+  template:
+    src: bitbucket.service.j2
+    dest: "{{ systemd_service_path }}/bitbucket.service"
+    mode: 0644
+- name: enable bitbucket service
+  become: yes
+  systemd:
+    name: bitbucket
+    daemon_reload: yes
+    enabled: yes

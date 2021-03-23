@@ -1,0 +1,14 @@
+[Unit]
+Description=Atlassian Confluence
+Documentation=https://www.atlassian.com/software/confluence 
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/tech/confluence/bin/start-confluence.sh 
+ExecStop=/tech/confluence/bin/stop-confluence.sh 
+User=confluence 
+Group=devops
+
+[Install]
+Wantedby=multi-user.target

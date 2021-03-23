@@ -1,0 +1,4 @@
+app_homepath: /app/bitbucket
+app_installation_path: /tech/bitbucket
+app_logpath : /log/bitbucket
+java_home: /tech/jdk1.8.0_171

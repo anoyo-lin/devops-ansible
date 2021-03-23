@@ -1,0 +1,4 @@
+- hosts: jiras 
+  roles:
+    - common   
+    - jiras

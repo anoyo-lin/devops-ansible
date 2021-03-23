@@ -1,0 +1,6 @@
+- hosts: devops_nginx-artifactory
+  become: yes
+  roles:
+    - install-git
+    - install-certs-nginx
+    - install-nginx

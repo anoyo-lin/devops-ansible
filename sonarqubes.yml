@@ -1,0 +1,10 @@
+# Ansible doesn't support using group_vars for the same host residing in multiple host groups.
+# we have to use single group_vars for multiple sonarqube instances on the same host.
+# Run this ansible playbook with '-e instance_id=<value>'. supported <value> can be found in the list below.
+- hosts: sonarqubes
+  pre_tasks:
+    - assert:
+      that: instance_id in ["sonarqube", "sonarqube-gene"]
+  roles:
+    - common
+    - sonarqubes

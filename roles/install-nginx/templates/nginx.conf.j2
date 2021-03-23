@@ -1,0 +1,94 @@
+worker_processes 4;
+
+events {
+    work_connections 4096;
+    }
+
+http {
+    upstream artifactory8081 {
+        ip_hash;
+        server 192,168.0.1:8081 weight-2 fail_timeout=300 max_fails=3;
+        server 192,168.0.2:8081 weight-2 fail_timeout=300 max_fails=3; 
+    }
+    upstream artifactory8082 {
+        ip_hash;
+        server 192,168.0.1:8082 weight-2 fail_timeout=300 max_fails=3;
+        server 192,168.0.2:8082 weight-2 fail_timeout=300 max_fails=3; 
+    }
+    server {
+        listen 443 ssl;
+        server_name artifactory.gene.com;
+        ssl_certificate /etc/pki/tls/certs/devops_common.cer;
+        ssl_certificate_key /etc/pki/tls/private/devops_common.key;
+        ssl_protocol TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_session_cache shared:SSL:1m;
+        ssl_prefer_sever_ciphers on;
+
+        if ($http_x_forwarded_proto = '') {
+            set $http_x_forwarded_proto $scheme;
+            }
+        access_log /log/nginx/nginx-access.log combined;
+        error_log /log/nginx/nginx-error.log;
+        rewrite ^/$ /ui/ redirect;
+        rewrite ^/ui$ /ui/ redirect;
+        chunked_transfer_encoding on;
+        client_max_body_size 0;
+
+        location / {
+            proxy_read_timeout 2400s;
+            proxy_pass_header   Sever;
+            proxy_pass http://artifactory8082
+            proxy_next_upstream error timeout non_idempotent
+            proxy_next_upstream_tries 1;
+            proxy_set_header X-JFrog-Override-Base-Url $http_x_forwarded_proto://$host:$server_port;
+            proxy_set_header X-Forwarded-Port $server_port;
+            proxy_set_header X-Forwarded_Proto $http_x_forwarded_proto
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            location ~ ^/artifactory/ {
+                proxy_pass http://artifactory8081;
+            }
+        }
+    }
+    server {
+        listen 443 ssl;
+        server_name notary.gene.com;
+        ssl_certificate /etc/pki/tls/certs/devops_common.cer;
+        ssl_certificate_key /etc/pki/tls/private/devops_common.key;
+        ssl_protocol TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_session_cache shared:SSL:1m;
+        ssl_prefer_sever_ciphers on;
+
+        if ($http_x_forwarded_proto = '') {
+            set $http_x_forwarded_proto $scheme;
+            }
+        access_log /log/nginx/nginx-access.log combined;
+        error_log /log/nginx/nginx-error.log;
+        chunked_transfer_encoding on;
+        client_max_body_size 0;
+
+        location / {
+            proxy_ssl_session_reuse on;
+
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_add;
+            proxy_set_header X-Forwarded-Port $server_port;
+            proxy_set_header X-Forwarded_Proto $scheme
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+
+            proxy_read_timeout 2400s;
+            proxy_pass_header Server;
+            proxy_cookie_path ~*^/.* /;
+            proxy_pass https://192.168.0.1:4443
+            proxy_next_upstream error timeout non_idempotent
+            proxy_next_upstream_tries 1;
+
+        }
+    }
+
+
+
+    

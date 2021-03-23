@@ -1,0 +1,23 @@
+---
+- name: git clone the certs
+  become: false
+  git:
+    repo: ssh://git.gene.com:8080/devopsutils/devops_certs.git
+    dest: /home/devops/devops_certs
+    accept_hostkey: yes
+- name: Copy comodo cert
+    become: true
+    shell: cat /home/devops/devops_certs/deveops_common/devops_common.cer /home/devops/devops_certs/comodo/comodo.cert > /etc/pki/tls/certs/deveops_common.cer
+- name: Copy devops common key
+    become: true
+    copy:
+      src: /home/devops/devops_certs/devops_common/devops_common.key
+      remote_src: yes
+      dest: /etc/pki/tls/private/devops_common.key
+      owner: root
+      group: root
+      mode: u=rw,g=,o=
+- name: Remove certs dir
+      file:
+        path: /home/devops/devops_certs
+        state: absent

@@ -1,0 +1,24 @@
+- name: configure java home
+  become: yes
+  become-user: confluence
+  lineinfile:
+      dest: "{{ app_installation_path }}/bin/setenv.sh"
+      insertbefore: BOF
+      regexp: "^export JAVA_HOME"
+      line: "JAVA_HOME=\"{{ java_home }}\""
+
+- name: configure java heap size
+    become: yes
+    become_user: confluence
+    lineinfile:
+      dest: "{{ app_installation_path }}/bin/setenv.sh"
+      regexp: "^CATALINA_OPTS=\"-Xms"
+      line: "CATALINA_OPTS=\"-Xms4g -Xmx6g --XX:+UseG1GC ${CATALINA_OPTS}\""
+
+- name: configure confluence home
+      become: yes
+      become_user: confluence
+      lineinfile:
+        dest: "{{ app_installation_path }}/confluence/WEB-INF/classes/confluence-init.properties"
+        regexp: "^confluence.home="
+        line: "confluence.home={{ app_homepath }}"

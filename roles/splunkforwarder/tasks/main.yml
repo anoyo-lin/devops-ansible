@@ -1,0 +1,20 @@
+- name: install systemd boot start
+  shell: "{{ splunk.forwarder_home }}/bin/splunk enable boot-start --no-prompt --answer-yes --accept-license"
+- name: enable splunkforwarder at startup
+  service:
+    name: splunk
+    enabled: true
+
+- name: stop splunkforwarder for setup
+  service:
+    name: splunk
+    state: stopped
+
+- name: add splunk forward server
+  shell: "{{ splunk.forwarder_home }}/bin/splunk add forward-server {{ splunk.server }}:9997"
+  ignore_errors: true
+- name: add deploy-poll
+  shell: "{{ splunk.forwarder_home }}/bin/splunk set deploy-poll {{ splunk.server }}:8089"
+  ignore_errors: true
+  notify:
+    - start splunkforwarder

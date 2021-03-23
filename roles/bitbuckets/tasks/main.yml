@@ -1,0 +1,115 @@
+- name: configure java home
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+      dest: "{{ app_installation_path }}/bin/set-jre-home.sh"
+      inserbefore: BOF
+      regexp: "^export JAVA_HOME"
+      line: "^export JAVA_HOME=\"{{ java_home }}\""
+
+- name: configure bitbucket home
+    become: yes
+    become_user: bitbucket
+    lineinfile:
+      dest: "{{ app_installation_path }}/bin/set-bitbucket-home.sh"
+      insertbefore: BOF
+      regexp: "^BITBUCKET_HONE"
+      line: "BITBUCKET_HOME=\"{{ app_homepath }}/localhome\""
+
+- name: configure bitbucket JVM_SUPPORT_RECOMMENDED_ARG
+      become: yes
+      become_user: bitbucket
+      lineinfile:
+        dest: "{{ app_installation_path }}/bin/_start-webapp.sh"
+        insertbefore: BOF
+        regexp: "^JVM_SUPPORT_RECOMMENDED_ARGS"
+        line: "^JVM_SUPPORT_RECOMMENDED_ARGS='-Dcluster.node.name={{ node_name }}
+        -Dhttp.proxy-host={{ node_name }} -Dhttp.proxyhost=10.128.255.41 -Dhttp.proxyHost=10.128.255.41 -Dhttp.proxyPort=80 -Dhttps.proxyHost=10.127.255.241
+        -Dhttp.nonProxyHosts=\"localhost\" -XX:ErrorFile={{ app_logpath }}/hs_err_pid-%p.log
+        -XX:HeapDumpPath={{ app_logpath }}/java_pid-$p.hprof -XX:-HeapDumpOnOutOfMemoryError -XX:+CrashOnOutOfMemory
+        -Xloggc:{{ app_logpath }}/'`date +%F_%H-%M-%S`'-gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution
+        -XX:+PrintGCCause -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=5M'"
+
+- name: configure Java heap size
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_installation_path }}/bin/_start-webapp.sh"
+    regexp: "^.*{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_items:
+    - { key: "JVM_MINIMUM_MEMORY", value: "4g" }
+    - { key: "JVM_MAXIMUM_MEMORY", value: "4g" }
+
+- name: configure bitbucket umask ( uncomment it )
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_installation_path }}/bin/_start-webapp.sh"
+    insertbefore: BOF
+    regexp: "umask 0027"
+    line: "umask 0027"
+
+- name: configure jdbc
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_homepath }}/sharedhome/bitbucket.properties"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_items:
+    - { key: "jdbc.driver", value: "com.microsoft.sqlserver.jdbc.SQLServerDriver" }
+    - { key: "jdbc.url", value: "jdbc:sqlserver://{{ mssql.host }}:{{ mssql.port }};databaseName={{ databases.bitbucket.name }}" }
+    - { key: "jdbc.user", value: "{{ databases.bitbucket.user }}" }
+    - { key: "jdbc.password", value: "{{ databases.bitbucket.password }}" }
+
+- name: configure proxy
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_homepath }}/sharedhome/bitbucket.properties"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_items:
+    - { key: "server.proxy-name", value: "git.gene.com" }
+    - { key: "server.proxy-port", value: "443" }
+    - { key: "server.secure", value: "true" }
+
+- name: configure cluster
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_homepath }}/sharedhome/bitbucket.properties"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_items:
+    - { key: "hazelcast.group.name", value: "prod-bitbucket-cluster" }
+    - { key: "hazelcast.group.password", value: "prod-bitbucket-cluster" }
+    - { key: "hazelcast.network.tcpip", value: "true" }
+    - { key: "hazelcast.network.tcpip.members", value: "192.168.1.8:5701,192.168.1.9:5701"}
+
+- name: configure git-http-backend
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_homepath }}/sharedhome/bitbucket.properties"
+    regexp: "^plugin.bitbucket-git.path.libexec=/usr/local/libexec"
+
+- name: configure elastic search
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: "{{ app_homepath }}/sharedhome/search/elasticsearch.yml"
+    regexp: "^network.host"
+    line: "network.host: 0.0.0.0"
+# due to change of the binding IP, elasticsearch will check the ulimit.
+- name: configure ulimit
+  become: yes
+  become_user: bitbucket
+  lineinfile:
+    dest: /etc/security/limits.conf
+    regexp: "^{{ item.type }}"
+    line: "{{ item.type }}    {{ item.value }}"
+  with_items:
+    - { type: "bitbucket        soft", value: "nofile      131072" }
+    - { type: "bitbucket        hard", value: "nofile      131072" }

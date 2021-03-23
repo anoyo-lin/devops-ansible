@@ -1,0 +1,17 @@
+- name: Install Git Repo
+  yum:
+    name: https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm
+    state: present
+    update_cache: yes
+  environment:
+    https_proxy: http://proxy.gene.com:8080
+    no_proxy: .microsoft.com, .gene.com
+- name: Install Git
+  yum:
+    name: git
+    state: present
+    update_cache: yes
+  environment:
+    https_proxy: http://proxy.gene.com:8080
+    no_proxy: .microsoft.com, .gene.com
+

@@ -1,0 +1,20 @@
+- name: Copy {{ wsadmin_action }} script to remote
+  template:
+    src: wsadmin-{{ wsadmin_action }}.py.j2
+    dest: "{{ tmp_paths.script }}/wsadmin-{{ wsadmin_action }}.py"
+    mode: 0644
+- name: Copy artifact to remote
+  copy:
+    src: "{{ artifact_file_path }}"
+    dest: "{{ tmp_paths.artifact }}/{{ artifact_file_path | basename }}"
+    mode: 0644
+
+- name: Gnerate {{ wsadmin_action }} script
+  template:
+    src: wsadmin-caller.sh.j2
+    dest: "{{ tmp_paths.script }}/wsadmin-caller.sh.j2"
+    mode: 0755
+  vars:
+    wsadmin_jython: "{{ tmp_paths.script }}/wsadmin-{{ wsadmin_action }}.py"
+- name: Run {{ wsadmin_action }} script
+  shell: "cd {{ tmp_paths.script }} && {{ tmp_paths.script }}/wsadmin-caller.sh.j2"_

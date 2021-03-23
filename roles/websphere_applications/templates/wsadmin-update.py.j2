@@ -1,0 +1,10 @@
+AdminApp.update("{{ application_name }}", "app", "[-operation update -update.ignore.new -contents ../artifact/{{ artifact_file_path | basename }} -useddefaultbindings]")
+AdminConfig.save()
+print("Commit Config Change...")
+import time 
+result = AdminApp.isAppReady("{{ application_name }}")
+print("Starting application...")
+while (result == "false"):
+    time.sleep(10)
+    result = AdminApp.isAppReady("{{ application_name }}")
+print(AdminApp.getDeployStatus("{{ application_name }}"))

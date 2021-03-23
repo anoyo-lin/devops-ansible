@@ -1,0 +1,32 @@
+- name: allow cron 
+  become: yes
+  lineinfile: 
+    dest: /etc/cron.allow
+    regexp: "^{{ item }}"
+    line: "{{ item }}"
+  with_items:
+    - bitbucket
+    - jira
+
+- name: copy backup script
+    become: yes
+    become_user: "{{ item }}"
+    copy:
+        src: rsync.sh
+        dest: "~"
+        mode: 0755
+    with_items:
+      - bitbucket
+      - jira
+
+- name: add backup cron
+      become: yes
+      become_user: "{{ item.application }}"
+      cron: 
+        name: backup {{ item.application }} from primary
+        minute: 00
+        hour: "{{ item.hour }}"
+        job: /home/{{ item.application }}/rsync.sh
+      with_items:
+        - { application: "bitbucket", hour: 1 }
+        - { application: "jira", hour: 23 }

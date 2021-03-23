@@ -1,0 +1,6 @@
+- hosts: artifactory-machines
+  become: yes
+  roles:
+    - sysctl-change
+    - install-docker
+    - install-git

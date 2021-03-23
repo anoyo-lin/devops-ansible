@@ -1,0 +1,9 @@
+- name: set owner of basic directories
+  file:
+    path: "{{ item }}"
+    owner: devops
+    group: devops
+    mode: 0755
+  with_items:
+    - /app
+    - /tech

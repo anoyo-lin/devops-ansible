@@ -1,0 +1,13 @@
+- name: "remove all proxy=_none_ in yum rh-cloud.repo"
+  replace:
+    path: '/etc/yum.repos.d/rh-cloud.repo'
+    regexp: '^(proxy=_none_\n)'
+    replace: ''
+    backup: yes
+
+- name: "add proxy=_none_ to yum rh-cloud.repo"
+  replace:
+    path: '/etc/yum.repos.drh-cloud.repo'
+    regexp: "^(enable=1)"
+    replace: "\1\nproxy=_none_"
+    backup: yes

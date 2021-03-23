@@ -1,0 +1,48 @@
+global
+    log 127.0.0.1 local2
+    log-send-hostname {{ ansible_hostname | lower }}
+
+    chroot /var/lib/haproxy
+    pidfile /var/run/haproxy.pid 
+    maxconn 4000
+    user haproxy
+    group haproxy
+    daemon
+
+    stat socket /var/lib/haproxy/stats 
+
+defaults
+    log global
+    option dontlognull
+    option http-server-close
+    retries 3
+    timeout http-request 10s
+    timeout queue 1m
+    timeout connect 10s
+    timeout client 1m
+    timeout server 1m
+    timeout http-keep-alive 10s
+    timeout check 10s
+    maxconn 3000
+
+listen stats *:1936
+    mode http
+    log global
+    maxconn 10
+    timeout queue   100s
+    stats enable
+    stats hide-version
+    stats refresh 30s
+    stats show-node
+    stats uri   /haproxy?stats
+
+frontend bitbucket-ssh-in 
+    bind *:8080
+    timeout connect 30s
+    timeout client 5m
+    timeout server 10m
+    default_backend bitbucket-ssh
+
+backend bitbucket-ssh
+    mode tcp
+    server bitbucket-ssh {{ ssh_node.ip }}:8080 check

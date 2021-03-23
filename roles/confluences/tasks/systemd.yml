@@ -1,0 +1,12 @@
+- name: configure confluence service
+  become: yes
+  copy:
+    src: confluence.service
+    dest: "{{ systemd_servie_path }}/confluence.service"
+    mode: 0644
+- name: enable confluence service
+  become: yes
+  systemd:
+    name: confluence
+    daemon_reload: yes
+    enabled: yes

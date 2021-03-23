@@ -1,0 +1,15 @@
+[Unit]
+Description=Altassian Bitbucket Service
+Documentation=https://www.altassian.com/software/bitbucket 
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/tech/bitbucket/bin/start-bitbucket.sh {{ search_flag }}
+ExecStop=/tech/bitbucket/bin/stop-bitbucket.sh
+LimitNOFILE=131072
+User=bitbucket
+Group=devops
+
+[Install]
+WantedBy=multi-user.target

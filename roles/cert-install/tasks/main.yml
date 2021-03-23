@@ -1,0 +1,22 @@
+---
+- name: Copy comodo cert
+  copy:
+    src: ./certs/comodo/comodo.cert
+    dest: /etc/pki/tls/certs/comodo.cert
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Copy devops common cert
+  copy:
+    src: ./certs/deveops_common/deveops_common.cer
+    dest: /etc/pki/tls/certs/deveops_common.cer
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Copy devops common key
+  copy:
+    src: ./certs/devops_common/devops_common.key
+    dest: /etc/pki/tls/private/devops_common.key
+    owner: root
+    group: root
+    mode: u=rw,g=,o=

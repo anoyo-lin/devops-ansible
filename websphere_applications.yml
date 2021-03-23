@@ -1,0 +1,10 @@
+- hosts: websphere_servers
+  pre_tasks:
+    - assert:
+      that:
+        - wsadmin_script is defined
+        - wsadmin_action in ["install", "update"]
+        - application_name is defined
+        - artifact_file_path is defined
+  roles:
+    - websphere_applications

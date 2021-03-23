@@ -1,0 +1,3 @@
+splunk:
+  server: splunk.gene.com
+  forwarder_home: /opt/splunkforwarder

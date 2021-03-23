@@ -1,0 +1,6 @@
+- name: configure haproxy
+  become: yes
+  template:
+    src: templates/haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: 0644

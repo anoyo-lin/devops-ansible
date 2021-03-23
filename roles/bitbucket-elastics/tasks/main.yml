@@ -1,0 +1,6 @@
+- name: configure sysctl vm.max_map_count (require server reboot)
+  become: yes
+  lineinfile:
+    dest: /etc/sysctl.conf
+    regexp: "^vm.max_map_count ="
+    line: "vm.max_map_count = 262144"

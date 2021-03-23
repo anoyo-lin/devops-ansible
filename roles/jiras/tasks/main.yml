@@ -1,0 +1,34 @@
+- name: configure java home
+    become: yes
+    become_user: jira
+    lineinfile:
+        dest: "{{ app_installation_path }}/bin/setenv.sh"
+        insertbefore: BOF
+        regexp: "^export JAVA_HOME"
+        line: "^export JAVA_HOME=\"{{ java_home }}\""
+- name: configure heap size
+    become: yes
+    become_user: jira
+    lineinfile:
+        dest: "{{ app_installation_path }}/bin/setenv.sh"
+        regexp: "^{{ item.key }}"
+        line: "{{ item.key }}={{ item.value }}"
+    with-items:
+        - { key: "JVM_MINIMUM_MEMORY", value: "\"4096m\"" }
+        - { key: "JVM_MAXIMUM_MEMORY", value: "\"4096m\"" }
+- name: configure jira service
+    become: yes
+    copy:
+        src: jira.service
+        dest: "{{ systemd_service_path }}/jira.service"
+        mode: 0644
+- name: enable jira service
+    become: yes
+    become_user: jira
+    systemd:
+        name: jira
+        daemon_reload: yes
+        enabled: yes
+
+
+    

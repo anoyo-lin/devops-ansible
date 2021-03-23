@@ -1,0 +1,49 @@
+- name: Add Docker CE repository
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+    force: yes
+    owner: root
+    group: root
+    mode: 0644
+- name: Add Proxy to Docker CE Repo
+  lineinfile:
+    path: /etc/yum.repos.d/docker-ce.repo
+    state: present
+    insertafter: "^\[docker-ce-stable\]"
+    line: 'proxy=http://proxy.gene.com:8080'
+- name: Install Docker CE
+  yum:
+    name: docker-ce
+    state: present
+    update_cache: yes
+- name: add proxy in systemd
+  blockinfile:
+    path: /usr/lib/systemd/system/docker.service
+    state: present
+    insertafter: "^Restart=always"
+    block: |
+      Environment="HTTP_PROXY=http://proxy.gene.com:8080"
+      Environment="NO_PROXY=.gene.com"
+- name: add-docker-group
+  group:
+    name: docker
+    state: present
+- name: adding user to docker group
+  user:
+    name: devops
+    append: yes
+    groups: docker
+- name: enable service docker
+  systemd:
+    name: docker
+    state: restarted
+    enabled: yes
+    daemone_reload: yes
+- name: install docker-compose
+  become: true
+  shell: https_proxy=http://proxy.gene.com curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+- name: change docker-compose permission
+  file:
+    path: /usr/local/bin/docker-compose
+    mode: 0755

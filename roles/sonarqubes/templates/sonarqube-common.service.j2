@@ -1,0 +1,14 @@
+[Unit]
+Description=Sonarqube Service
+Documentation=https://www.soanrqube.org
+After=network.target
+
+[Service]
+Type=forking
+ExecStart={{ app_homepath }}/bin/linux-x86-64/sonar.sh start
+ExecStop={{ app_homepath }}/bin/linux-x86-64/sonar.sh stop
+User=sonarqube 
+Group=devops
+
+[Install]
+WantedBy=multi-user.target

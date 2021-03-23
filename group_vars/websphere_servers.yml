@@ -1,0 +1,4 @@
+tmp_base_path: ~/tmp/ansible
+tmp_paths:
+  script: "{{ tmp_base_path }}/script"
+  artifact: "{{ tmp_base_path }}/artifact"

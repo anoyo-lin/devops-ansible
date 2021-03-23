@@ -1,0 +1,6 @@
+---
+nginx_host_name: artifactory.gene.com
+nginx_proxypass_url: http://jenkins.gene.com
+nginx_conf_filename: "nginx.conf"
+nginx_conf_template: "nginx.conf.j2"
+nginx_conf_path: /app/nginx/conf

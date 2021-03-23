@@ -1,0 +1,6 @@
+- name: update httpd logging
+  become: yes
+  lineinfile: dest=/etc/httpd/conf/httpd.conf
+  regexp: "LogFormat.*combined$"
+  line: "LogFormat \"%h %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-Agene}i\\\" \\\"LogFormat \"%h %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-Agene}i\\\" \\\"%{Cookie}i\\\" %D\" combined"
+  notify: restart http

@@ -1,0 +1,101 @@
+- name: confgiure java command
+  become: yes
+  become_user: sonarqube
+  lineinfile:
+    dest: "{{ app_homepath }}/conf/wrapper.conf"
+    regexp: "^wrapper.java.command="
+    line: "wrapper.java.command={{ java_home }}/bin/java"
+- name: configure java options
+  become: yes
+  become_user: sonarqube
+  lineinfile:
+    dest: "{{ app_homepath }}/conf/sonar.properties"
+    regexp: "^soanr.web.javaOpts="
+    line: "sonar.web.javaOpts=-server -Xmx4G -Xms4G -XX:"sonar.web.javaOpts=-server -Xmx4G -Xms4G -XX:+HeapDumpOnOutOfMemoryError"
+
+- name: configure log file location
+  become: yes
+  become_user: sonarqube
+  lineinfile:
+    dest: "{{ app_homepath }}/conf/wrapper.conf"
+    regexp: "^wrapper.logfile="
+    line: "wrapper.logfile={{ app_homepath }}/logs/sonar.log"
+
+- name: configure jdbc, ports and key 
+  become: yes
+  become_user: sonarqube
+  lineinfile:
+    dest: "{{ app_homepath }}/conf/sonar.properties"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_items:
+    - { key: "sonar.web.port", value: "{{ sonarqube['instances']['instance_id']['port'] }}" }
+    - { key: "sonar.search.port", value: "{{ sonarqube['instances']['instance_id']['search_port'] }}" }
+    - { key: "sonar.web.context", value: "{{ sonarqube['instances']['instance_id']['context_root'] }}" }
+    - { key: "sonar.jdbc.port", value: "{{ jdbc:sqlserver://{{ mssql.host }}:{{ mssql.port }};databaseName={{ database[instance_id]['name'] }}" }
+    - { key: "sonar.jdbc.port", value: "{{ database[instance_id]['user'] }}" }
+    - { key: "sonar.jdbc.port", value: "{{ database[instance_id]['password']['masked'] }}" }
+    - { key: "sonar.secretKeyPath", value: "{{ app_homepath }}/secure/my_secret_key.txt" }
+
+- name: configure http proxy
+    become: yes
+    become_user: sonarqube
+    lineinfile:
+      dest: "{{ app_homepath }}/conf/sonar.properties"
+      regexp: "^{{ item.key }}="
+      line: "{{ item.key }}={{ item.value }}"
+    with_items:
+      - { key: "http.proxyHost", value: "{{ proxy.http.ip }}" }
+      - { key: "http.proxyPort", value: "{{ proxy.http.port }}" }
+
+- name: create directory for secret key
+      become: yes
+      become_user: sonarqube
+      file:
+          path: "{{ app_homepath }}/secure/"
+          state: directory
+          owner: sonarqube
+          group: devops
+          mode: 0770
+- name: configure secret key
+        become: yes
+        become_user: sonarqube
+        copy:
+            src: my_secret_key.txt
+            dest: "{{ app_homepath }}/secure/my_secret_key.txt"
+            owner: sonarqube
+            group: devops
+            mode: 0664
+- name: enable ldap authentication
+          become: yes
+          become_user: sonarqube
+          lineinfile:
+            dest: "{{ app_homepath }}/conf/sonar.properties"
+            regexp: "^{{ item.key }}="
+            line: "{{ item.key }}={{ item.value }}"
+          with_items:
+            - { key: "sonar.security.realm", value: "LDAP" }
+            - { key: "sonar.security.savePassword", value: "true" }
+            - { key: "sonar.authenticator.downcase", value: "true" }
+            - { key: "ldap.servers", value: "{{ ldap.contries.keys()|join(',') }}" }
+- name: configure ladap settings
+            become: yes
+            become_user: sonarqube
+            blockinfile:
+              path: "{{ app_homepath }}/conf/sonar.properties"
+              marker_begin: "BEGIN LDAP configuration of {{ item.key }}"
+              block: |
+                ldap.{{ item.key }}.url=ldap://{{ ldap.host }}
+                ldap.{{ item.key }}.windows.auth=true
+                ldap.{{ item.key }}.bindDn={{ ldap.bind.dn }}
+                ldap.{{ item.key }}.bindPassword={{ ldap.bind.password }}
+                ldap.{{ item.key }}.user.baseDn={{ item.value.user.basedn }}
+                ldap.{{ item.key }}.user.request=(mail={0})
+                ldap.{{ item.key }}.user.realNameAttribute={{ item.value.user.name_attribute }}
+                ldap.{{ item.key }}.user.emailAttribute=mail
+                ldap.{{ item.key }}.group.baseDn={{ item.value.group.basedn }}
+                ldap.{{ item.key }}.group.requst=(&(objectClass=group)(member={dn}))
+                ldap.{{ item.key }}.group.idAttribute={{ item.value.group.id_attribure }}
+            with_dict: "{{ ldap.countries }}"
+
+

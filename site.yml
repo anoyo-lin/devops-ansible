@@ -1,0 +1,8 @@
+- hosts: all
+  roles:
+    - common
+
+- import_playbook: applications.yml
+- import_playbook: bitbuckets.yml
+- import_playbook: jiras.yml 
+- import_playbook: sonarqube.yml

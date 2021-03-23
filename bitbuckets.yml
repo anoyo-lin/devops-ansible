@@ -1,0 +1,10 @@
+- hosts: bitbuckets
+  roles:
+    - common
+    - bitbuckets
+- hosts: bitbucket-elastics
+  roles:
+    - bitbucket-elastics
+- hosts: bitbucket-noelastics
+  roles:
+    - bitbucket-noelastics

@@ -1,0 +1,40 @@
+---
+apache_enablerepo: ""
+
+apache_listen_ip: "*"
+apache_listen_port: 80
+apache_listen_port_ssl: 443
+
+apache_create_vhosts: true
+apache_vhosts_filename: "vhosts.conf"
+apahce_vhosts_template: "vhosts.conf.j2"
+
+apache_remove_default_vhosts: false
+
+apache_global_vhost_settings: |
+  DirectoryIndex index.php index.html
+
+apache_vhosts:
+  - servername: "local.dev"
+    documentroot: "/var/www/html"
+
+apache_allow_override: "local.dev"
+apahce_options: "-Indexes +FollowSymLinks"
+
+apache_vhosts_ssl: []
+
+apache_ignore_missing_ssl_certifacate: true
+
+apache_ssl_protocol: "ALL -SSLv2 -SSLv3"
+apache_ssl_cipher_suite: "AES256+EECDH:AES256+EDH"
+
+apache_mods_enabled:
+    - rewrite.load
+    - ssl.load
+apache_mods_disabled: []
+
+apache_state: started
+
+apache_restart_state: restarted
+
+apache_packages_state: present

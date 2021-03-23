@@ -1,0 +1,20 @@
+- hosts: local 
+  tasks:
+    - name: git clone
+      git:
+        repo: ssh://git@git.gene.com/devopsutils/devops_certs.git
+        dest: ./certs 
+- hosts: devops_apache_confluence
+  become: yes
+  roles: 
+    - yumrepo-noproxy
+    - cert-install
+    - ansible-role-apache
+    - change-httplog-format
+
+- hosts: local
+  tasks:
+    - name: remove certs directory
+      file:
+        state: absent
+        path: "certs/"

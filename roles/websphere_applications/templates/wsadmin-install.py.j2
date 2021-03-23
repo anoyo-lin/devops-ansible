@@ -1,0 +1,13 @@
+AdminApp.install("../artifact/{{ artifact_file_path | basename }}", "[ -nopreCompileJSPs -distributeApp -nouseMetaDataFromBinary -nodeployejb -appname {{ application_name }} -createMBeansForResources -noreloadEnabled -nodeployws -validateinstall warn -nopreocessEmbeddedConfig -filepermission .*\.dll=755#.*\.so=755#.*\.a=755#.*\.sl=755 -noallowDispatchRemoteInclude -noallowServiceRemoteInclude -asyncRequestDispatchType DISABLED -nouseAutoLink -noenalbeClientModule -clientMode isolated -novalidateSchema -MapModulesToServers [[.* '.*.war,.*' {{ wsadmin_opt }} ]] -MapWebModToVH [[.* '.*.war,.*' {{ wsadmin_vhost }}]]]")
+AdminConfig.save()
+print("Commit Config Change...")
+import time 
+result = AdminApp.isAppReady("{{ application_name }}")
+print("Starting application...")
+while (result == "false"):
+    time.sleep(10)
+    result = AdminApp.isAppReady("{{ application_name }}")
+print(AdminApp.getDeployStatus("{{ application_name }}"))
+appManager = AdminControl.queryNames('WebSphere:cell={{ wsadmin_cell }},node={{ wsadmin_node }},type={{ wsadmin_type }},process={{ wsadmin_server}},*')
+AdminControl.invoke(appManager, 'startApplication', "{{ application_name }}")
+print("Application started successfully")

@@ -1,0 +1,12 @@
+- name: configure jenkins to use ssl
+  become: yes
+  lineinfile:
+    dest: "/etc/sysconfig/jenkins"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  with_items:
+    - { key: "JENKINS_PORT", value: "-1" }
+    - { key: "JENKINS_HTTPS_PORT", value: "8443" }
+    - { key: "JENKINS_HTTPS_KEYSTORE", value: "/etc/pki/tls/certs/jira.jks" }
+    - { key: "JENKINS_HTTPS_KEYSTORE_PASSWORD", value: "password" }
+    - { key: "JENKINS_HTTPS_LISTEN_ADDRESS", value: "0.0.0.0" }

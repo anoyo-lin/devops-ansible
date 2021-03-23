@@ -1,0 +1,14 @@
+[Unit]
+Description=Atlassian Jira Service
+Documentation=https://www.atlassian.com/softeare/Jira
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/tech/jira/bin/start-jira.sh
+ExecStop=/tech/jira/bin/stop-jira.sh
+User=jira
+Group=devops
+
+[Install]
+Wantedby=multi-user.target

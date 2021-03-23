@@ -1,0 +1,4 @@
+- name: start splunkforwarder
+  service:
+    name: splunk
+    state: started 
